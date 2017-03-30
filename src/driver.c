@@ -267,7 +267,7 @@ void LocalUartIsRxDone(uint16 past_ms_val)
 		
 		if((g_local_uart_struct.rx_delay_time_counter == 0)&&(g_local_uart_struct.rx_counter > 0))
 		{
-			g_local_uart_struct.rx_flag = VALID_VAL_AA;
+			g_local_uart_struct.rx_flag = VALID_VAL_AA;	//-一段时间内没有接收到内容就认为结束一条指令了,可以开始处理了
 		}
 	}
 }
@@ -291,7 +291,7 @@ void DriverMain(void)
 	
 	sys_tick_cur_val = boot_struct.sys_tick_ms_counter;///获取系统ms计数；
 	
-	past_ms_val = (sys_tick_cur_val + (65535 - sys_tick_pre_val)) % 65535;
+	past_ms_val = (sys_tick_cur_val + (65535 - sys_tick_pre_val)) % 65535;	//-得到经过的时间段
 	LocalUartIsRxDone(past_ms_val);
 	sys_tick_pre_val = sys_tick_cur_val;
 }

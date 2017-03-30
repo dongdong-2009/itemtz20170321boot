@@ -83,7 +83,7 @@ uint8 BootReset(void)
 	res = BootFlashErase();
 	return res;
 }
-void BootRxProgram(uint8 in_data[],uint16 len)
+void BootRxProgram(uint8 in_data[],uint16 len)		//-对接收到的内容进行处理
 {
 	uint8 res = FALSE,check_val,tx_data[1];
 
@@ -114,7 +114,7 @@ void BootRxProgram(uint8 in_data[],uint16 len)
 		boot_struct.cur_rx_packet_index += 1;
 		LocalUartFxedLenSend(tx_data,1);
 	}
-	boot_struct.boot_ms_delay_counter = 0;
+	boot_struct.boot_ms_delay_counter = 0;	//-重新计时
 RETURN_LAB:
 	return;
 }
@@ -138,18 +138,18 @@ void BootMain(void)
 	
 	while(boot_struct.boot_ms_delay_counter < 5000)
 ///	while(1)
-	{
+	{//-串口升级搬运数据
 		FeedWtd();
-		DriverMain();
+		DriverMain();	//-判断是否有有效串口数据被接收到
 		
-		total_len = GetLocalUartRxData(rx_data);
+		total_len = GetLocalUartRxData(rx_data);	//-获取可能的字节数,无就返回0
 		
 		if(total_len == 0)
 		{
 			continue;
 		}
 		
-		///兼容天昊的串口调试工具开始
+		///兼容天昊的串口调试工具开始,,仅仅调整了串口的初始化
 		if((rx_data[0] == 0x01)&&(rx_data[1] == 0x06)&&
 		   (rx_data[2] == 0x05)&&(rx_data[3] == 0x01)&&(rx_data[7] == 0x0a))
 		{	
@@ -157,7 +157,7 @@ void BootMain(void)
 			boot_struct.total_packet_num = rx_data[5];
 			boot_struct.program_total_size = 0;
 			rx_max_packet = ((FLASH_STORE_END_ADDR - FlASH_STORE_START_ADDR)/ST32_PAGE_SIZE)*2;
-			if(boot_struct.total_packet_num > rx_max_packet)
+			if(boot_struct.total_packet_num > rx_max_packet)	//-判断是否正确
 			{
 				break;
 			}
@@ -169,7 +169,7 @@ void BootMain(void)
 
 			tx_data[0] = 0x06;tx_data[1] = 0x01;tx_data[2] = 0x03;
 			tx_data[3] = 0x02;tx_data[4] = 0x06;tx_data[5] = 0x0a;
-			LocalUartFxedLenSend(tx_data,6);
+			LocalUartFxedLenSend(tx_data,6);	//-通过串口发送出数据
 		//	g_local_uart_struct.rx_counter = 0;
 			LongTimeDly(500);
 			UsartInit(LOCAL_USART,38400,USART_DATA_8B,USART_STOPBITS_1,USART_PARITY_NO);
@@ -177,11 +177,11 @@ void BootMain(void)
 			continue;
 		}
 		
-		BootRxProgram(rx_data,total_len);
+		BootRxProgram(rx_data,total_len);	//-里面实现了代码的搬运
 		
 		if((boot_struct.cur_rx_packet_index == boot_struct.total_packet_num)&&
 		   (boot_struct.total_packet_num > 0))
-		{
+		{//-完成了代码的搬运下面开始准备允许新代码
 			LongTimeDly(500);
 			res = BootParaInit();
 			if(!res)
@@ -192,7 +192,7 @@ void BootMain(void)
 			break;
 		}
 	}	
-
+	//-下面完成备份区域代码到应用程序代码的搬运
 	FeedWtd();
 	FlashRead(BOOT_PARA_START_ADDR,(uint8*)&boot_struct.program_update_flag,12);
 	if(boot_struct.program_update_flag == VALID_VAL_DWORD_AA)
@@ -226,8 +226,8 @@ void BootMain(void)
 	UsartInit(LOCAL_USART,9600,USART_DATA_8B,USART_STOPBITS_1,USART_PARITY_NO);		
 	LocalUartFxedLenSend("boot start...\r\n",StrLen("boot start...\r\n",0));
 	LongTimeDly(500);
-
+	//-下面运行新代码
 	FeedWtd();
-	BootAppProgram();
+	BootAppProgram();	
 	while(1);
 }

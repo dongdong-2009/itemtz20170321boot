@@ -3,18 +3,18 @@
 void SysTick_Handler(void)
 {
 	boot_struct.sys_tick_ms_counter++;
-	boot_struct.boot_ms_delay_counter++;
+	boot_struct.boot_ms_delay_counter++;	//-ºÁÃë¼ÆÊý
 }
 void USART1_IRQHandler(void)///±¾µØ´®¿Ú
 {
 	if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)
 	{
-		if(g_local_uart_struct.rx_counter >= LOCAL_UART_BUF_LEN)
+		if(g_local_uart_struct.rx_counter >= LOCAL_UART_BUF_LEN)	//-¼ÇÂ¼½ÓÊÕµ½µÄ×Ö½ÚÊý
 		{
 			g_local_uart_struct.rx_counter -= 1;
 		}
 		g_local_uart_struct.rx_buf[g_local_uart_struct.rx_counter++] = USART_ReceiveData(USART1);
-		g_local_uart_struct.rx_delay_time_counter = UART_RX_50_MS_DELAY;
+		g_local_uart_struct.rx_delay_time_counter = UART_RX_50_MS_DELAY;	//å?ÓÃÓÚµ¹¼ÆÊ±
 	}
 }
 void PVD_IRQHandler(void)
