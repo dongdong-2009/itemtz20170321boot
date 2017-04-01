@@ -197,6 +197,9 @@ void BootMain(void)
 	FlashRead(BOOT_PARA_START_ADDR,(uint8*)&boot_struct.program_update_flag,12);
 	if(boot_struct.program_update_flag == VALID_VAL_DWORD_AA)
 	{
+		LocalUartFxedLenSend("boot Program start\r\n",StrLen("boot Program start\r\n",0));
+		LocalUartFxedLenSend((uint8*)&boot_struct.program_update_flag,12);
+		LocalUartFxedLenSend("...\r\n",StrLen("...\r\n",0));
 		res = BootProgramIap();
 		if(!res)
 		{
@@ -225,6 +228,8 @@ void BootMain(void)
 
 	UsartInit(LOCAL_USART,9600,USART_DATA_8B,USART_STOPBITS_1,USART_PARITY_NO);		
 	LocalUartFxedLenSend("boot start...\r\n",StrLen("boot start...\r\n",0));
+	LocalUartFxedLenSend((uint8*)&boot_struct.program_update_flag,12);
+	LocalUartFxedLenSend("...\r\n",StrLen("...\r\n",0));
 	LongTimeDly(500);
 	//-下面运行新代码
 	FeedWtd();
